@@ -21,8 +21,15 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
+<<<<<<< HEAD
 # volumn data files
 set1_data/
 
 VolVis/.DS_Store
 
+=======
+/lib/
+
+.DS_STORE
+>>>>>>> 455c36f2e00c7640f17cd2bb0e014fe562599eac
+/build/
