@@ -24,3 +24,5 @@ hs_err_pid*
 # volumn data files
 set1_data/
 
+VolVis/.DS_Store
+
