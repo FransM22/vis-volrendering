@@ -30,3 +30,4 @@ set1_data/
 # netbeans
 nbproject/private/*
 
+/dist/
