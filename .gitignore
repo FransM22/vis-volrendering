@@ -26,3 +26,8 @@ set1_data/
 /lib/
 .DS_STORE
 /build/
+
+# netbeans
+nbproject/private/*
+
+/dist/
