@@ -12,6 +12,7 @@ import gui.RaycastRendererPanel;
 import gui.TransferFunction2DEditor;
 import gui.TransferFunctionEditor;
 import java.awt.image.BufferedImage;
+import static java.lang.Math.floor;
 import util.TFChangeListener;
 import util.VectorMath;
 import volume.GradientVolume;
@@ -91,7 +92,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         int y = (int) Math.floor(coord[1]);
         int z = (int) Math.floor(coord[2]);
 
-        return volume.getVoxel(x, y, z);
+//        return volume.getVoxel(x, y, z);
+        return (short) floor(volume.getInterpolated(x, y, z));
     }
 
 
