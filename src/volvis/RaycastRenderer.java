@@ -181,6 +181,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         // image is square
         int imageCenter = image.getWidth() / 2;
 
+        double[] originPlaneCoord = new double[3];
         double[] pixelCoord = new double[3];
         double[] volumeCenter = new double[3];
         VectorMath.setVector(volumeCenter, volume.getDimX() / 2, volume.getDimY() / 2, volume.getDimZ() / 2);
@@ -194,14 +195,22 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             for (int i = 0; i < image.getWidth(); i++) {
                 int val = 0;
                 
-                for (int k = -100; k <= 100; k++) {
-                    pixelCoord[0] = uVec[0] * (i - imageCenter) + vVec[0] * (j - imageCenter)
-                            + volumeCenter[0] + viewVec[0] * k;
-                    pixelCoord[1] = uVec[1] * (i - imageCenter) + vVec[1] * (j - imageCenter)
-                            + volumeCenter[1] + viewVec[1] * k;
-                    pixelCoord[2] = uVec[2] * (i - imageCenter) + vVec[2] * (j - imageCenter)
-                            + volumeCenter[2] + viewVec[2] * k;
-
+                // Depth is bounded above by the maximum size of all dimensions,
+                // * 2
+                int depth = Math.max(volume.getDimX(), Math.max(volume.getDimY(), volume.getDimZ()));
+                originPlaneCoord[0] = uVec[0] * (i - imageCenter) + vVec[0] * (j - imageCenter)
+                            + volumeCenter[0];
+                originPlaneCoord[1] = uVec[1] * (i - imageCenter) + vVec[1] * (j - imageCenter)
+                            + volumeCenter[1];
+                originPlaneCoord[2] = uVec[2] * (i - imageCenter) + vVec[2] * (j - imageCenter)
+                            + volumeCenter[2];
+                    
+                for (int k = -depth; k <= depth; k++) {
+                    // TODO - optimize by checking whether voxel exist on each side
+                    pixelCoord[0] = originPlaneCoord[0] + viewVec[0] * k;
+                    pixelCoord[1] = originPlaneCoord[1] + viewVec[1] * k;
+                    pixelCoord[2] = originPlaneCoord[2] + viewVec[2] * k;
+                    
                     val = Math.max(val, getVoxel(pixelCoord));
                 }
                 
