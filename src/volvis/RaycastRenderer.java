@@ -11,6 +11,8 @@ import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 import gui.RaycastRendererPanel;
 import gui.TransferFunction2DEditor;
 import gui.TransferFunctionEditor;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import util.TFChangeListener;
 import util.VectorMath;
@@ -52,6 +54,13 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             imageSize = imageSize + 1;
         }
         image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
+        
+        // An image on which the volume may be rendered. It is scaled to the image field
+        nativeImage = new BufferedImage(
+                (int) Math.floor(image.getWidth() * renderScale),
+                (int) Math.floor(image.getHeight() * renderScale),
+                BufferedImage.TYPE_INT_ARGB);
+        
         // create a standard TF where lowest intensity maps to black, the highest to white, and opacity increases
         // linearly from 0.0 to 1.0 over the intensity range
         tFunc = new TransferFunction(volume.getMinimum(), volume.getMaximum());
@@ -93,8 +102,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         int y = (int) Math.floor(coord[1]);
         int z = (int) Math.floor(coord[2]);
 
-//        return volume.getVoxel(x, y, z);
-        return (short) Math.floor(volume.getInterpolated(x, y, z));
+        return volume.getVoxel(x, y, z);
     }
 
 
@@ -163,9 +171,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     
     void mip(double[] viewMatrix){
         // clear image
-        for (int j = 0; j < image.getHeight(); j++) {
-            for (int i = 0; i < image.getWidth(); i++) {
-                image.setRGB(i, j, 0);
+        for (int j = 0; j < nativeImage.getHeight(); j++) {
+            for (int i = 0; i < nativeImage.getWidth(); i++) {
+                nativeImage.setRGB(i, j, 0);
             }
         }
 
@@ -179,7 +187,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         VectorMath.setVector(vVec, viewMatrix[1], viewMatrix[5], viewMatrix[9]);
         
         // image is square
-        int imageCenter = image.getWidth() / 2;
+        int imageCenter = nativeImage.getWidth() / 2;
 
         double[] originPlaneCoord = new double[3];
         double[] pixelCoord = new double[3];
@@ -191,22 +199,19 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         TFColor voxelColor = new TFColor();
 
         
-        for (int j = 0; j < image.getHeight(); j++) {
-            for (int i = 0; i < image.getWidth(); i++) {
+        for (int j = 0; j < nativeImage.getHeight(); j++) {
+            for (int i = 0; i < nativeImage.getWidth(); i++) {
                 int val = 0;
                 
-                // Depth is bounded above by the maximum size of all dimensions,
-                // * 2
                 int depth = Math.max(volume.getDimX(), Math.max(volume.getDimY(), volume.getDimZ()));
-                originPlaneCoord[0] = uVec[0] * (i - imageCenter) + vVec[0] * (j - imageCenter)
+                originPlaneCoord[0] = uVec[0] * (i - imageCenter) * (1/renderScale) + vVec[0] * (j - imageCenter) * (1/renderScale)
                             + volumeCenter[0];
-                originPlaneCoord[1] = uVec[1] * (i - imageCenter) + vVec[1] * (j - imageCenter)
+                originPlaneCoord[1] = uVec[1] * (i - imageCenter) * (1/renderScale) + vVec[1] * (j - imageCenter) * (1/renderScale)
                             + volumeCenter[1];
-                originPlaneCoord[2] = uVec[2] * (i - imageCenter) + vVec[2] * (j - imageCenter)
+                originPlaneCoord[2] = uVec[2] * (i - imageCenter) * (1/renderScale) + vVec[2] * (j - imageCenter) * (1/renderScale)
                             + volumeCenter[2];
                     
-                for (int k = -depth; k <= depth; k++) {
-                    // TODO - optimize by checking whether voxel exist on each side
+                for (double k = -depth; k <= depth; k += 1/renderScale) {
                     pixelCoord[0] = originPlaneCoord[0] + viewVec[0] * k;
                     pixelCoord[1] = originPlaneCoord[1] + viewVec[1] * k;
                     pixelCoord[2] = originPlaneCoord[2] + viewVec[2] * k;
@@ -229,9 +234,15 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 int c_green = voxelColor.g <= 1.0 ? (int) Math.floor(voxelColor.g * 255) : 255;
                 int c_blue = voxelColor.b <= 1.0 ? (int) Math.floor(voxelColor.b * 255) : 255;
                 int pixelColor = (c_alpha << 24) | (c_red << 16) | (c_green << 8) | c_blue;
-                image.setRGB(i, j, pixelColor);
+                nativeImage.setRGB(i, j, pixelColor);
             }
         }
+        
+        AffineTransform at = new AffineTransform();
+        at.scale(1/renderScale, 1/renderScale);
+        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        
+        scaleOp.filter(nativeImage, image);
     }
     
     
@@ -372,6 +383,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
 
     }
     private BufferedImage image;
+    private BufferedImage nativeImage;
+    private double renderScale = 0.5;
+
     
     private double[] viewMatrix = new double[4 * 4];
 
