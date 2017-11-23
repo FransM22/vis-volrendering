@@ -31,3 +31,4 @@ set1_data/
 nbproject/private/*
 
 /dist/
+/build/
