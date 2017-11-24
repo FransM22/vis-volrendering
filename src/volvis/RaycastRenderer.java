@@ -56,10 +56,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
         
         // An image on which the volume may be rendered. It is scaled to the image field
-        nativeImage = new BufferedImage(
-                (int) Math.floor(image.getWidth() * renderScale),
-                (int) Math.floor(image.getHeight() * renderScale),
-                BufferedImage.TYPE_INT_ARGB);
+        createNativeImage();
         
         // create a standard TF where lowest intensity maps to black, the highest to white, and opacity increases
         // linearly from 0.0 to 1.0 over the intensity range
@@ -405,6 +402,13 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         gl.glPopAttrib();
 
     }
+    
+    private void createNativeImage() {
+        nativeImage = new BufferedImage(
+            (int) Math.floor(image.getWidth() * renderScale),
+            (int) Math.floor(image.getHeight() * renderScale),
+            BufferedImage.TYPE_INT_ARGB);
+    }
 
     @Override
     public void visualize(GL2 gl) {
@@ -465,6 +469,10 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     private BufferedImage nativeImage;
     private double renderScale = 0.5;
 
+    public void setRenderScale(double rs) {
+        renderScale = rs;
+        createNativeImage();
+    }
     
     private double[] viewMatrix = new double[4 * 4];
 
