@@ -16,8 +16,8 @@ public class GradientVolume {
         dimY = vol.getDimY();
         dimZ = vol.getDimZ();
         data = new VoxelGradient[dimX * dimY * dimZ];
-        compute();
         maxmag = -1.0;
+        compute();
     }
 
     public VoxelGradient getGradient(int x, int y, int z) {
@@ -52,8 +52,40 @@ public class GradientVolume {
     private void compute() {
 
         // this just initializes all gradients to the vector (0,0,0)
-        for (int i=0; i<data.length; i++) {
-            data[i] = zero;
+        //for (int i=0; i<data.length; i++) {
+        //    data[i] = zero;
+        //}
+        
+        for (int x = 0; x < dimX; x++){
+            for (int y = 0; y < dimY; y++){
+                for (int z = 0; z < dimZ; z++){
+                    float gx, gy, gz;
+                    
+                    if (x == 0 || x == dimX - 1){
+                        gx = 0;
+                    } else {
+                        gx = ((float)volume.getVoxel(x+1, y, z) - (float)volume.getVoxel(x-1, y, z)) / 2;
+                    }
+                    
+                    if (y == 0 || y == dimY - 1){
+                        gy = 0;
+                    } else {
+                        gy = ((float)volume.getVoxel(x, y+1, z) - (float)volume.getVoxel(x, y-1, z)) / 2;
+                    }
+                    
+                    if (z ==0 || z == dimZ - 1){
+                        gz = 0;
+                    } else {
+                        gz = ((float)volume.getVoxel(x, y, z+1) - (float)volume.getVoxel(x, y, z-1)) / 2;
+                    }
+                    
+                    VoxelGradient vg = new VoxelGradient(gx, gy, gz);
+                    setGradient(x, y, z, vg);
+                    if (maxmag < vg.mag){
+                        maxmag = vg.mag;
+                    }
+                }
+            }
         }
                 
     }
