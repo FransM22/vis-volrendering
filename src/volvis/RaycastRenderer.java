@@ -202,7 +202,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 originPlaneCoord[2] = uVec[2] * (i - imageCenter) * (1/renderScale) + vVec[2] * (j - imageCenter) * (1/renderScale)
                             + volumeCenter[2];
                     
-                for (double k = -depth; k <= depth; k += 1/renderScale) {
+                for (double k = -depth; k <= depth; k += 5/renderScale) {
                     pixelCoord[0] = originPlaneCoord[0] + viewVec[0] * k;
                     pixelCoord[1] = originPlaneCoord[1] + viewVec[1] * k;
                     pixelCoord[2] = originPlaneCoord[2] + viewVec[2] * k;
@@ -279,7 +279,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 originPlaneCoord[2] = uVec[2] * (i - imageCenter) * (1/renderScale) + vVec[2] * (j - imageCenter) * (1/renderScale)
                             + volumeCenter[2];
                     
-                for (double k = -depth; k <= depth; k += 1/renderScale) {
+                for (double k = -depth; k <= depth; k += 5/renderScale) {
                     pixelCoord[0] = originPlaneCoord[0] + viewVec[0] * k;
                     pixelCoord[1] = originPlaneCoord[1] + viewVec[1] * k;
                     pixelCoord[2] = originPlaneCoord[2] + viewVec[2] * k;
