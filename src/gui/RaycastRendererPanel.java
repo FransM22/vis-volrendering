@@ -94,14 +94,16 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
             }
         });
 
-        jSlider.setMinimum(1);
+        jSlider.setMinimum(50);
+        jSlider.setToolTipText("");
+        jSlider.setValue(80);
         jSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 jSliderStateChanged(evt);
             }
         });
 
-        jLabel2.setText("Render size");
+        jLabel2.setText("Ray sample num");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -174,10 +176,10 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
 
     private void jSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSliderStateChanged
         if (!jSlider.getValueIsAdjusting()) {
-            double renderSize = 0.01 * jSlider.getValue();
-            renderer.setRenderScale(renderSize);
+            int sampleNum = jSlider.getValue();
+            renderer.setSampleNum(sampleNum);
             renderer.changed();
-            System.out.println("Adjusted to " + renderSize);
+            System.out.println("Adjusted to " + sampleNum);
         }
     }//GEN-LAST:event_jSliderStateChanged
 
