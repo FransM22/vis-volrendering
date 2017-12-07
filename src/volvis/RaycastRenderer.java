@@ -199,13 +199,6 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     }
     
     void mip(double[] viewMatrix){
-        // clear image
-        // for (int j = 0; j < image.getHeight(); j++) {
-        //     for (int i = 0; i < image.getWidth(); i++) {
-        //         image.setRGB(i, j, 0);
-        //     }
-        // }
-
         // vector uVec and vVec define a plane through the origin, 
         // perpendicular to the view vector viewVec
         double[] viewVec = new double[3];

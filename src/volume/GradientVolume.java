@@ -50,12 +50,6 @@ public class GradientVolume {
     }
 
     private void compute() {
-
-        // this just initializes all gradients to the vector (0,0,0)
-        //for (int i=0; i<data.length; i++) {
-        //    data[i] = zero;
-        //}
-        
         for (int x = 0; x < dimX; x++){
             for (int y = 0; y < dimY; y++){
                 for (int z = 0; z < dimZ; z++){
