@@ -98,13 +98,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
 
 
     void slicer(double[] viewMatrix) {
-
-        // clear image
-        for (int j = 0; j < nativeImage.getHeight(); j++) {
-            for (int i = 0; i < nativeImage.getWidth(); i++) {
-                nativeImage.setRGB(i, j, 0);
-            }
-        }
+        clearImage(nativeImage);
 
         // vector uVec and vVec define a plane through the origin, 
         // perpendicular to the view vector viewVec
@@ -157,11 +151,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             }
         }
         
-        AffineTransform at = new AffineTransform();
-        at.scale(1/renderScale, 1/renderScale);
-        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-        
-        scaleOp.filter(nativeImage, image);
+        scaleImageTo(nativeImage, image);
     }
 
     // viewVec, coordinate on view plane
@@ -204,6 +194,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     }
     
     void mip(double[] viewMatrix){
+        clearImage(nativeImage);
         // vector uVec and vVec define a plane through the origin, 
         // perpendicular to the view vector viewVec
         double[] viewVec = new double[3];
@@ -266,11 +257,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             }
         }
         
-        AffineTransform at = new AffineTransform();
-        at.scale(1/renderScale, 1/renderScale);
-        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-        
-        scaleOp.filter(nativeImage, image);
+        scaleImageTo(nativeImage, image);
     }
     
     
@@ -518,6 +505,22 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     
     public void setSampleDepth(double sd) {
         sampleDepth = sd;
+    }
+    
+    private void clearImage(BufferedImage image) {
+        for (int j = 0; j < image.getHeight(); j++) {
+             for (int i = 0; i < image.getWidth(); i++) {
+                 image.setRGB(i, j, 0);
+             }
+         }
+    }
+    
+    private void scaleImageTo(BufferedImage img1, BufferedImage img2) {
+        AffineTransform at = new AffineTransform();
+        at.scale(1/renderScale, 1/renderScale);
+        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        
+        scaleOp.filter(img1, img2);
     }
     
     private double[] viewMatrix = new double[4 * 4];
