@@ -28,17 +28,22 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="renderingSpeedLabel" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <Group type="103" alignment="1" groupAlignment="0" attributes="0">
-                      <Component id="compositingButton" min="-2" max="-2" attributes="0"/>
-                      <Component id="tf2dButton" min="-2" max="-2" attributes="0"/>
-                      <Component id="mipButton" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="slicerButton" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="shadingCheckbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="jSlider" alignment="0" min="-2" pref="125" max="-2" attributes="0"/>
+                  <Group type="102" alignment="1" attributes="0">
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="compositingButton" min="-2" max="-2" attributes="0"/>
+                          <Component id="tf2dButton" max="32767" attributes="0"/>
+                          <Component id="mipButton" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="slicerButton" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="shadingCheckbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleCountLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jSlider" alignment="0" pref="0" max="32767" attributes="0"/>
+                          <Component id="renderResolutionLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jSlider1" alignment="0" pref="0" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace pref="339" max="32767" attributes="0"/>
+              <EmptySpace pref="294" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -60,11 +65,15 @@
               <Component id="tf2dButton" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="shadingCheckbox" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
-              <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Component id="renderResolutionLabel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+              <Component id="jSlider1" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="13" max="-2" attributes="0"/>
+              <Component id="sampleCountLabel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               <Component id="jSlider" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="76" max="32767" attributes="0"/>
+              <EmptySpace pref="37" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -143,10 +152,23 @@
         <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="jSliderStateChanged"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel2">
+    <Component class="javax.swing.JLabel" name="sampleCountLabel">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Ray sample num"/>
+        <Property name="text" type="java.lang.String" value="Samples per ray"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="renderResolutionLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Render resolution"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JSlider" name="jSlider1">
+      <Properties>
+        <Property name="minimum" type="int" value="1"/>
+      </Properties>
+      <Events>
+        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="renderResolutionChanged"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

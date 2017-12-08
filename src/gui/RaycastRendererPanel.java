@@ -48,7 +48,9 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
         tf2dButton = new javax.swing.JRadioButton();
         shadingCheckbox = new javax.swing.JCheckBox();
         jSlider = new javax.swing.JSlider();
-        jLabel2 = new javax.swing.JLabel();
+        sampleCountLabel = new javax.swing.JLabel();
+        renderResolutionLabel = new javax.swing.JLabel();
+        jSlider1 = new javax.swing.JSlider();
 
         jLabel1.setText("Rendering time (ms):");
 
@@ -103,7 +105,16 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
             }
         });
 
-        jLabel2.setText("Ray sample num");
+        sampleCountLabel.setText("Samples per ray");
+
+        renderResolutionLabel.setText("Render resolution");
+
+        jSlider1.setMinimum(1);
+        jSlider1.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                renderResolutionChanged(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -116,15 +127,19 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(renderingSpeedLabel))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(compositingButton)
-                        .addComponent(tf2dButton)
-                        .addComponent(mipButton)
-                        .addComponent(slicerButton)
-                        .addComponent(shadingCheckbox)
-                        .addComponent(jLabel2)
-                        .addComponent(jSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(339, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(compositingButton)
+                            .addComponent(tf2dButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(mipButton)
+                            .addComponent(slicerButton)
+                            .addComponent(shadingCheckbox)
+                            .addComponent(sampleCountLabel)
+                            .addComponent(jSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(renderResolutionLabel)
+                            .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addGap(0, 0, 0)))
+                .addContainerGap(294, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -143,11 +158,15 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
                 .addComponent(tf2dButton)
                 .addGap(18, 18, 18)
                 .addComponent(shadingCheckbox)
-                .addGap(15, 15, 15)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(renderResolutionLabel)
+                .addGap(0, 0, 0)
+                .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(13, 13, 13)
+                .addComponent(sampleCountLabel)
+                .addGap(0, 0, 0)
                 .addComponent(jSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(76, Short.MAX_VALUE))
+                .addContainerGap(37, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -176,22 +195,33 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_shadingCheckboxActionPerformed
 
     private void jSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSliderStateChanged
+        int sampleNum = jSlider.getValue();
+        sampleCountLabel.setText("Samples per ray: " + sampleNum);
         if (!jSlider.getValueIsAdjusting()) {
-            int sampleNum = jSlider.getValue();
             renderer.setSampleNum(sampleNum);
             renderer.changed();
-            System.out.println("Adjusted to " + sampleNum);
         }
     }//GEN-LAST:event_jSliderStateChanged
+
+    private void renderResolutionChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_renderResolutionChanged
+        double renderScale = 0.01 * jSlider1.getValue();
+        renderResolutionLabel.setText("Render scale: " + String.format("%.2f", renderScale));
+        if (!jSlider1.getValueIsAdjusting()) {
+            renderer.setRenderScale(renderScale);
+            renderer.changed();
+        }
+    }//GEN-LAST:event_renderResolutionChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JRadioButton compositingButton;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JSlider jSlider;
+    private javax.swing.JSlider jSlider1;
     private javax.swing.JRadioButton mipButton;
+    private javax.swing.JLabel renderResolutionLabel;
     private javax.swing.JLabel renderingSpeedLabel;
+    private javax.swing.JLabel sampleCountLabel;
     private javax.swing.JCheckBox shadingCheckbox;
     private javax.swing.JRadioButton slicerButton;
     private javax.swing.JRadioButton tf2dButton;

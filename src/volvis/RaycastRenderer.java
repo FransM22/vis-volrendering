@@ -56,7 +56,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
         
         // An image on which the volume may be rendered. It is scaled to the image field
-        // createNativeImage();
+        createNativeImage();
         
         // create a standard TF where lowest intensity maps to black, the highest to white, and opacity increases
         // linearly from 0.0 to 1.0 over the intensity range
@@ -209,7 +209,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         VectorMath.setVector(vVec, viewMatrix[1], viewMatrix[5], viewMatrix[9]);
         
         // image is square
-        int imageCenter = image.getWidth() / 2;
+        int imageCenter = nativeImage.getWidth() / 2;
         
         // coordinate of point (i,j) in the coordinate system of the volume
         double[] coordOnPlane = new double[3];
@@ -222,13 +222,13 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         TFColor voxelColor = new TFColor();
 
         
-        for (int j = 0; j < image.getHeight(); j++) {
-            for (int i = 0; i < image.getWidth(); i++) {
+        for (int j = 0; j < nativeImage.getHeight(); j++) {
+            for (int i = 0; i < nativeImage.getWidth(); i++) {
                 int val = 0;
                 
-                coordOnPlane[0] = uVec[0] * (i - imageCenter) + vVec[0] * (j - imageCenter) + volumeCenter[0];
-                coordOnPlane[1] = uVec[1] * (i - imageCenter) + vVec[1] * (j - imageCenter) + volumeCenter[1];
-                coordOnPlane[2] = uVec[2] * (i - imageCenter) + vVec[2] * (j - imageCenter) + volumeCenter[2];
+                coordOnPlane[0] = uVec[0] * (i - imageCenter) * (1/renderScale) + vVec[0] * (j - imageCenter) * (1/renderScale) + volumeCenter[0];
+                coordOnPlane[1] = uVec[1] * (i - imageCenter) * (1/renderScale) + vVec[1] * (j - imageCenter) * (1/renderScale) + volumeCenter[1];
+                coordOnPlane[2] = uVec[2] * (i - imageCenter) * (1/renderScale) + vVec[2] * (j - imageCenter) * (1/renderScale) + volumeCenter[2];
                 
                 double[] fbDepth = getRayDepth(viewVec, coordOnPlane);
                 double gap = (fbDepth[0] - fbDepth[1]) / sampleNum;
@@ -257,9 +257,15 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 int c_green = voxelColor.g <= 1.0 ? (int) Math.floor(voxelColor.g * 255) : 255;
                 int c_blue = voxelColor.b <= 1.0 ? (int) Math.floor(voxelColor.b * 255) : 255;
                 int pixelColor = (c_alpha << 24) | (c_red << 16) | (c_green << 8) | c_blue;
-                image.setRGB(i, j, pixelColor);
+                nativeImage.setRGB(i, j, pixelColor);
             }
         }
+        
+        AffineTransform at = new AffineTransform();
+        at.scale(1/renderScale, 1/renderScale);
+        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        
+        scaleOp.filter(nativeImage, image);
     }
     
     
@@ -427,12 +433,16 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
 
     }
     
-//    private void createNativeImage() {
-//        nativeImage = new BufferedImage(
-//            (int) Math.floor(image.getWidth() * renderScale),
-//            (int) Math.floor(image.getHeight() * renderScale),
-//            BufferedImage.TYPE_INT_ARGB);
-//    }
+    public void setRenderScale(double rs) {
+        renderScale = rs;
+        createNativeImage();
+    }
+    private void createNativeImage() {
+        nativeImage = new BufferedImage(
+            (int) Math.floor(image.getWidth() * renderScale),
+            (int) Math.floor(image.getHeight() * renderScale),
+            BufferedImage.TYPE_INT_ARGB);
+    }
 
     @Override
     public void visualize(GL2 gl) {
@@ -490,14 +500,14 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
 
     }
     private BufferedImage image;
-    // private BufferedImage nativeImage;
-    // private double renderScale = 0.5;
+    private BufferedImage nativeImage;
+    private double renderScale = 0.5;
     private int sampleNum = 80;
 
     public void setSampleNum(int sn) {
         sampleNum = sn;
         callRayFunction();
-        //createNativeImage();
+        createNativeImage();
     }
     
     private double[] viewMatrix = new double[4 * 4];
