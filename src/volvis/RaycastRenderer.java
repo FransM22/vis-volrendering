@@ -378,7 +378,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 
                 double[] fbDepth = getRayDepth(viewVec, coordOnPlane);
                 double gap = (fbDepth[0] - fbDepth[1]) / sampleNum;
-                double alphaVal = tfEditor2D.getAlpha(val, grad);
+                TFColor col = new TFColor(0, 0, 0, 0);
                 // System.out.println("mip::gap: " + gap);
                 // ray cast through (i,j)
                 for (double k = fbDepth[1]; k <= fbDepth[0]; k += gap) {
@@ -390,7 +390,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                             (int) Math.floor(voxelCoord[0]),
                             (int) Math.floor(voxelCoord[1]),
                             (int) Math.floor(voxelCoord[2])).mag;
-                    alphaVal = alphaVal * (1-tfEditor2D.getAlpha(val, grad));
+                    
+                    col = compositingColor(col, tfEditor2D.getColor(val, grad));
+                    
                 }
                 
                 // Map the intensity to a grey value by linear scaling
@@ -402,10 +404,10 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 // voxelColor = tFunc.getColor(val);
                 
                 // BufferedImage expects a pixel color packed as ARGB in an int
-                int c_alpha = alphaVal <= 1.0 ? (int) Math.floor(alphaVal * 255) : 255;
-                int c_red = tfEditor2D.getColor().r <= 1.0 ? (int) Math.floor( tfEditor2D.getColor().r) : 255;
-                int c_green = tfEditor2D.getColor().g <= 1.0 ? (int) Math.floor( tfEditor2D.getColor().g) : 255;
-                int c_blue = tfEditor2D.getColor().b <= 1.0 ? (int) Math.floor( tfEditor2D.getColor().b) : 255;
+                int c_alpha = col.a <= 1.0 ? (int) Math.floor(col.a * 255) : 255;
+                int c_red = col.r <= 1.0 ? (int) Math.floor( col.r * 255) : 255;
+                int c_green = col.g <= 1.0 ? (int) Math.floor( col.g * 255) : 255;
+                int c_blue = col.b <= 1.0 ? (int) Math.floor( col.b * 255) : 255;
                 int pixelColor = (c_alpha << 24) | (c_red << 16) | (c_green << 8) | c_blue;
                 nativeImage.setRGB(i, j, pixelColor);
             }

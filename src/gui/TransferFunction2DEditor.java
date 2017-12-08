@@ -94,8 +94,11 @@ public class TransferFunction2DEditor extends javax.swing.JPanel {
         return triangleWidget.getAlpha(val, gradmag);
     }
     
-    public TFColor getColor() {
-        return triangleWidget.color;
+    public TFColor getColor(double val, double gradmag) {
+        return new TFColor(triangleWidget.color.r,
+                triangleWidget.color.g,
+                triangleWidget.color.b,
+                triangleWidget.getAlpha(val, gradmag));
     }
 
     /**
@@ -308,7 +311,6 @@ public class TransferFunction2DEditor extends javax.swing.JPanel {
         
         public double getAlpha(double val, double grad) {
             double r = radius;
-            TFColor baseColor = color;
             
             if (grad == 0) {
                 return 1;
