@@ -93,6 +93,10 @@ public class TransferFunction2DEditor extends javax.swing.JPanel {
     public double getAlpha(double val, double gradmag) {
         return triangleWidget.getAlpha(val, gradmag);
     }
+    
+    public TFColor getColor() {
+        return triangleWidget.color;
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
