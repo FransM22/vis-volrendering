@@ -51,6 +51,8 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
         sampleCountLabel = new javax.swing.JLabel();
         renderResolutionLabel = new javax.swing.JLabel();
         jSlider1 = new javax.swing.JSlider();
+        sliceDepthSlider = new javax.swing.JSlider();
+        sliceDepthLabel = new javax.swing.JLabel();
 
         jLabel1.setText("Rendering time (ms):");
 
@@ -116,6 +118,17 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
             }
         });
 
+        sliceDepthSlider.setMaximum(200);
+        sliceDepthSlider.setMinimum(-200);
+        sliceDepthSlider.setValue(0);
+        sliceDepthSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sliceDepthSliderStateChanged(evt);
+            }
+        });
+
+        sliceDepthLabel.setText("Slice depth");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -123,11 +136,13 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(sliceDepthSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(renderingSpeedLabel))
-                    .addGroup(layout.createSequentialGroup()
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(sliceDepthLabel)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(compositingButton)
                             .addComponent(tf2dButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -137,9 +152,8 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
                             .addComponent(sampleCountLabel)
                             .addComponent(jSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                             .addComponent(renderResolutionLabel)
-                            .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                        .addGap(0, 0, 0)))
-                .addContainerGap(294, Short.MAX_VALUE))
+                            .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))))
+                .addContainerGap(335, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -150,6 +164,10 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
                     .addComponent(renderingSpeedLabel))
                 .addGap(49, 49, 49)
                 .addComponent(slicerButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(sliceDepthLabel)
+                .addGap(0, 0, 0)
+                .addComponent(sliceDepthSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(mipButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -166,7 +184,7 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
                 .addComponent(sampleCountLabel)
                 .addGap(0, 0, 0)
                 .addComponent(jSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(37, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -212,6 +230,15 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_renderResolutionChanged
 
+    private void sliceDepthSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliceDepthSliderStateChanged
+        double sliceDepth = (double) sliceDepthSlider.getValue();
+        sliceDepthLabel.setText("Slice depth: " + String.format("%.0f", sliceDepth));
+        if (!sliceDepthSlider.getValueIsAdjusting()) {
+            renderer.setSampleDepth(sliceDepth);
+            renderer.changed();
+        }
+    }//GEN-LAST:event_sliceDepthSliderStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JRadioButton compositingButton;
@@ -223,6 +250,8 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
     private javax.swing.JLabel renderingSpeedLabel;
     private javax.swing.JLabel sampleCountLabel;
     private javax.swing.JCheckBox shadingCheckbox;
+    private javax.swing.JLabel sliceDepthLabel;
+    private javax.swing.JSlider sliceDepthSlider;
     private javax.swing.JRadioButton slicerButton;
     private javax.swing.JRadioButton tf2dButton;
     // End of variables declaration//GEN-END:variables

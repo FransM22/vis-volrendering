@@ -130,11 +130,11 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         for (int j = 0; j < image.getHeight(); j++) {
             for (int i = 0; i < image.getWidth(); i++) {
                 pixelCoord[0] = uVec[0] * (i - imageCenter) + vVec[0] * (j - imageCenter)
-                        + volumeCenter[0];
+                        + volumeCenter[0] + viewVec[0] * sampleDepth;
                 pixelCoord[1] = uVec[1] * (i - imageCenter) + vVec[1] * (j - imageCenter)
-                        + volumeCenter[1];
+                        + volumeCenter[1] + viewVec[1] * sampleDepth;
                 pixelCoord[2] = uVec[2] * (i - imageCenter) + vVec[2] * (j - imageCenter)
-                        + volumeCenter[2];
+                        + volumeCenter[2] + viewVec[2] * sampleDepth;
 
                 int val = getVoxel(pixelCoord);
                 
@@ -503,11 +503,16 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     private BufferedImage nativeImage;
     private double renderScale = 0.5;
     private int sampleNum = 80;
+    private double sampleDepth = 0; // Used for the slicer method
 
     public void setSampleNum(int sn) {
         sampleNum = sn;
         callRayFunction();
         createNativeImage();
+    }
+    
+    public void setSampleDepth(double sd) {
+        sampleDepth = sd;
     }
     
     private double[] viewMatrix = new double[4 * 4];
