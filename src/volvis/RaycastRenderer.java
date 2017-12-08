@@ -342,7 +342,76 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     }
     
     void transferFunc2D(double[] viewMatrix){
+        clearImage(nativeImage);
+
+        // vector uVec and vVec define a plane through the origin, 
+        // perpendicular to the view vector viewVec
+        double[] viewVec = new double[3];
+        double[] uVec = new double[3];
+        double[] vVec = new double[3];
+        VectorMath.setVector(viewVec, viewMatrix[2], viewMatrix[6], viewMatrix[10]);
+        VectorMath.setVector(uVec, viewMatrix[0], viewMatrix[4], viewMatrix[8]);
+        VectorMath.setVector(vVec, viewMatrix[1], viewMatrix[5], viewMatrix[9]);
         
+        // image is square
+        int imageCenter = nativeImage.getWidth() / 2;
+        
+        // coordinate of point (i,j) in the coordinate system of the volume
+        double[] coordOnPlane = new double[3];
+        // coordinate of point on the ray casting line
+        double[] voxelCoord = new double[3];
+        double[] volumeCenter = new double[3];
+        VectorMath.setVector(volumeCenter, volume.getDimX() / 2, volume.getDimY() / 2, volume.getDimZ() / 2);
+        
+        // sample on a plane through the origin of the volume data
+        double max = volume.getMaximum();
+
+        
+        for (int j = 0; j < nativeImage.getHeight(); j++) {
+            for (int i = 0; i < nativeImage.getWidth(); i++) {
+                int val = 0;
+                double grad = 0;
+                
+                coordOnPlane[0] = uVec[0] * (i - imageCenter) * (1/renderScale) + vVec[0] * (j - imageCenter) * (1/renderScale) + volumeCenter[0];
+                coordOnPlane[1] = uVec[1] * (i - imageCenter) * (1/renderScale) + vVec[1] * (j - imageCenter) * (1/renderScale) + volumeCenter[1];
+                coordOnPlane[2] = uVec[2] * (i - imageCenter) * (1/renderScale) + vVec[2] * (j - imageCenter) * (1/renderScale)+ volumeCenter[2];
+                
+                double[] fbDepth = getRayDepth(viewVec, coordOnPlane);
+                double gap = (fbDepth[0] - fbDepth[1]) / sampleNum;
+                double colorVal = tfEditor2D.getAlpha(val, grad);
+                // System.out.println("mip::gap: " + gap);
+                // ray cast through (i,j)
+                for (double k = fbDepth[1]; k <= fbDepth[0]; k += gap) {
+                    voxelCoord[0] = coordOnPlane[0] + viewVec[0] * k;
+                    voxelCoord[1] = coordOnPlane[1] + viewVec[1] * k;
+                    voxelCoord[2] = coordOnPlane[2] + viewVec[2] * k;
+                    val = getVoxel(voxelCoord);
+                    grad = gradients.getGradient(
+                            (int) Math.floor(voxelCoord[0]),
+                            (int) Math.floor(voxelCoord[1]),
+                            (int) Math.floor(voxelCoord[2])).mag;
+                    colorVal = colorVal * tfEditor2D.getAlpha(val, grad);
+                }
+                
+                // Map the intensity to a grey value by linear scaling
+                // voxelColor.r = val/max;
+                // voxelColor.g = voxelColor.r;
+                // voxelColor.b = voxelColor.r;
+                // voxelColor.a = val > 0 ? 1.0 : 0.0;  // this makes intensity 0 completely transparent and the rest opaque
+                // Alternatively, apply the transfer function to obtain a color
+                // voxelColor = tFunc.getColor(val);
+                
+                // BufferedImage expects a pixel color packed as ARGB in an int
+                int c_alpha = colorVal <= 1.0 ? (int) Math.floor(colorVal * 255) : 255;
+                int c_red = c_alpha;
+                int c_green = c_alpha;
+                int c_blue = c_alpha;
+                int pixelColor = (c_alpha << 24) | (c_red << 16) | (c_green << 8) | c_blue;
+                nativeImage.setRGB(i, j, pixelColor);
+            }
+        }
+        
+        scaleImageTo(nativeImage, image);
     }
     
     public void callRayFunction() {
@@ -524,6 +593,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
 
     @Override
     public void changed() {
+        callRayFunction();
         for (int i=0; i < listeners.size(); i++) {
             listeners.get(i).changed();
         }
