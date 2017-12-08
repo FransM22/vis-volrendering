@@ -165,7 +165,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="renderResolutionLabel">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Render resolution"/>
+        <Property name="text" type="java.lang.String" value="Render scale"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JSlider" name="jSlider1">

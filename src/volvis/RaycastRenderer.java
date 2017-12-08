@@ -100,9 +100,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     void slicer(double[] viewMatrix) {
 
         // clear image
-        for (int j = 0; j < image.getHeight(); j++) {
-            for (int i = 0; i < image.getWidth(); i++) {
-                image.setRGB(i, j, 0);
+        for (int j = 0; j < nativeImage.getHeight(); j++) {
+            for (int i = 0; i < nativeImage.getWidth(); i++) {
+                nativeImage.setRGB(i, j, 0);
             }
         }
 
@@ -116,7 +116,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         VectorMath.setVector(vVec, viewMatrix[1], viewMatrix[5], viewMatrix[9]);
 
         // image is square
-        int imageCenter = image.getWidth() / 2;
+        int imageCenter = nativeImage.getWidth() / 2;
 
         double[] pixelCoord = new double[3];
         double[] volumeCenter = new double[3];
@@ -127,13 +127,13 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         TFColor voxelColor = new TFColor();
 
         
-        for (int j = 0; j < image.getHeight(); j++) {
-            for (int i = 0; i < image.getWidth(); i++) {
-                pixelCoord[0] = uVec[0] * (i - imageCenter) + vVec[0] * (j - imageCenter)
+        for (int j = 0; j < nativeImage.getHeight(); j++) {
+            for (int i = 0; i < nativeImage.getWidth(); i++) {
+                pixelCoord[0] = uVec[0] * (i - imageCenter) * (1/renderScale) + vVec[0] * (j - imageCenter) * (1/renderScale)
                         + volumeCenter[0] + viewVec[0] * sampleDepth;
-                pixelCoord[1] = uVec[1] * (i - imageCenter) + vVec[1] * (j - imageCenter)
+                pixelCoord[1] = uVec[1] * (i - imageCenter) * (1/renderScale) + vVec[1] * (j - imageCenter) * (1/renderScale)
                         + volumeCenter[1] + viewVec[1] * sampleDepth;
-                pixelCoord[2] = uVec[2] * (i - imageCenter) + vVec[2] * (j - imageCenter)
+                pixelCoord[2] = uVec[2] * (i - imageCenter) * (1/renderScale) + vVec[2] * (j - imageCenter) * (1/renderScale)
                         + volumeCenter[2] + viewVec[2] * sampleDepth;
 
                 int val = getVoxel(pixelCoord);
@@ -153,10 +153,15 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 int c_green = voxelColor.g <= 1.0 ? (int) Math.floor(voxelColor.g * 255) : 255;
                 int c_blue = voxelColor.b <= 1.0 ? (int) Math.floor(voxelColor.b * 255) : 255;
                 int pixelColor = (c_alpha << 24) | (c_red << 16) | (c_green << 8) | c_blue;
-                image.setRGB(i, j, pixelColor);
+                nativeImage.setRGB(i, j, pixelColor);
             }
         }
-
+        
+        AffineTransform at = new AffineTransform();
+        at.scale(1/renderScale, 1/renderScale);
+        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        
+        scaleOp.filter(nativeImage, image);
     }
 
     // viewVec, coordinate on view plane

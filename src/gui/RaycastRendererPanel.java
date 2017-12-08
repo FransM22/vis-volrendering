@@ -109,7 +109,7 @@ public class RaycastRendererPanel extends javax.swing.JPanel {
 
         sampleCountLabel.setText("Samples per ray");
 
-        renderResolutionLabel.setText("Render resolution");
+        renderResolutionLabel.setText("Render scale");
 
         jSlider1.setMinimum(1);
         jSlider1.addChangeListener(new javax.swing.event.ChangeListener() {
