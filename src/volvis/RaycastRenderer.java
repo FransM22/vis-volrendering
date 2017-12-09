@@ -18,6 +18,7 @@ import util.TFChangeListener;
 import util.VectorMath;
 import volume.GradientVolume;
 import volume.Volume;
+import java.util.Arrays;
 
 /**
  *
@@ -153,7 +154,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         
         scaleImageTo(nativeImage, image);
     }
-
+    
     // viewVec, coordinate on view plane
     double[] getRayDepth(double[] viewVec, double[] coordOnPlane){
         int[][] border = new int[3][2];
@@ -173,8 +174,12 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 // one of dp and dn is negative
                 double dp = (border[d][0] - coordOnPlane[d]) / viewVec[d];
                 double dn = (border[d][1] - coordOnPlane[d]) / viewVec[d];
+                if ((dp > 0 && dn > 0) || (dp < 0 && dn < 0)){
+                    // outside the box, no samples
+                    return new double[]{0, 0};
+                }
                 
-                if (dp < 0 || dn > 0){
+                if (dp < 0 && dn > 0){
                     double tmp = dp;
                     dp = dn;
                     dn = tmp;
@@ -189,7 +194,6 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             
         }
         double[] fbDepth = new double[] {fDepth, bDepth};
-        // System.out.println("getRayDepth::fbDepth " + fbDepth);
         return fbDepth;
     }
     
@@ -228,9 +232,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 
                 double[] fbDepth = getRayDepth(viewVec, coordOnPlane);
                 double gap = (fbDepth[0] - fbDepth[1]) / sampleNum;
-                // System.out.println("mip::gap: " + gap);
-                // ray cast through (i,j)     
-                for (double k = fbDepth[1]; k <= fbDepth[0]; k += gap) {
+                // System.out.println("mip::gap::fbDepth " + Arrays.toString(fbDepth));
+                // ray cast through (i,j)
+                for (double k = fbDepth[1]; k < fbDepth[0]; k += gap) {
                     voxelCoord[0] = coordOnPlane[0] + viewVec[0] * k;
                     voxelCoord[1] = coordOnPlane[1] + viewVec[1] * k;
                     voxelCoord[2] = coordOnPlane[2] + viewVec[2] * k;
