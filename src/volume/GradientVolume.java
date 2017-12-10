@@ -28,7 +28,48 @@ public class GradientVolume {
         }
         return data[x + dimX * (y + dimY * z)];
     }
-
+    
+    public VoxelGradient getInterpolatedGrad(double x, double y, double z){
+        int x0 = (int)Math.floor(x);
+        int x1 = x0 + 1;
+        int y0 = (int)Math.floor(y);
+        int y1 = y0 +1;
+        int z0 = (int)Math.floor(z);
+        int z1 = z0 + 1;
+        
+        VoxelGradient g000 = getGradient(x0, y0, z0);
+        VoxelGradient g001 = getGradient(x0, y0, z1);
+        VoxelGradient g010 = getGradient(x0, y1, z0);
+        VoxelGradient g011 = getGradient(x0, y1, z1);
+        VoxelGradient g100 = getGradient(x1, y0, z0);
+        VoxelGradient g101 = getGradient(x1, y0, z1);
+        VoxelGradient g110 = getGradient(x1, y1, z0);
+        VoxelGradient g111 = getGradient(x1, y1, z1);
+        
+        double ratiox = x - x0;
+        double ratioy = y - y0;
+        double ratioz = z - z0;
+        
+        VoxelGradient g00 = linearInterpolate(g000, g001, ratioz);
+        VoxelGradient g01 = linearInterpolate(g010, g011, ratioz);
+        VoxelGradient g10 = linearInterpolate(g100, g101, ratioz);
+        VoxelGradient g11 = linearInterpolate(g110, g111, ratioz);
+        
+        VoxelGradient g0 = linearInterpolate(g00, g01, ratioy);
+        VoxelGradient g1 = linearInterpolate(g10, g11, ratioy);
+        
+        VoxelGradient g = linearInterpolate(g0, g1, ratiox);
+        
+        return g;
+    }
+    
+    private VoxelGradient linearInterpolate(VoxelGradient g1, VoxelGradient g2, double r){
+        float x = (float)(g1.x*(1-r) + g2.x*r);
+        float y = (float)(g1.y*(1-r) + g2.y*r);
+        float z = (float)(g1.z*(1-r) + g2.z*r);
+        
+        return new VoxelGradient(x,y,z);
+    }
     
     public void setGradient(int x, int y, int z, VoxelGradient value) {
         data[x + dimX * (y + dimY * z)] = value;
