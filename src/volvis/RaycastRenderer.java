@@ -348,8 +348,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     private double levoy(double[] p, int v) {
     	double f = v;
     	double fv = tfEditor2D.triangleWidget.baseIntensity;
-    	double g = Math.abs(gradients.getInterpolatedGrad(p[0], p[1], p[2]).mag);
-    	
+    	double g = gradients.getInterpolatedGrad(p[0], p[1], p[2]).mag;
+    	if(g > tfEditor2D.triangleWidget.maxGrad || g < tfEditor2D.triangleWidget.minGrad)
+    		return 0.0;
     	double r = tfEditor2D.triangleWidget.radius;
     	double alpha;
     	if(g == 0 && f == fv)
