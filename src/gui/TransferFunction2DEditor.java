@@ -342,8 +342,8 @@ public class TransferFunction2DEditor extends javax.swing.JPanel {
             if (value < 0) {
                 value = 0;
             } 
-            if (value > 1.0) {
-                value = 1.0;
+            if (value > (float)gradvol.getMaxGradientMagnitude()) {
+                value = (float)gradvol.getMaxGradientMagnitude();
             }
             triangleWidget.maxGrad = (float)value;
         } catch (NumberFormatException e) {
@@ -359,8 +359,8 @@ public class TransferFunction2DEditor extends javax.swing.JPanel {
             if (value < 0) {
                 value = 0;
             } 
-            if (value > 1.0) {
-                value = 1.0;
+            if (value > (float)gradvol.getMaxGradientMagnitude()) {
+                value = (float)gradvol.getMaxGradientMagnitude();
             }
             triangleWidget.minGrad = (float)value;
         } catch (NumberFormatException e) {
