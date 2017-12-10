@@ -519,7 +519,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             (int) Math.floor(image.getHeight() * renderScale),
             BufferedImage.TYPE_INT_ARGB);
     }
-
+    public void setShading(boolean b){
+        this.enableShading = b;
+    }
     @Override
     public void visualize(GL2 gl) {
 
@@ -580,6 +582,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     private double renderScale = 0.5;
     private int sampleNum = 80;
     private double sampleDepth = 0; // Used for the slicer method
+    private boolean enableShading = false;
 
     public void setSampleNum(int sn) {
         sampleNum = sn;
