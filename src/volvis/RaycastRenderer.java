@@ -173,8 +173,12 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 // one of dp and dn is negative
                 double dp = (border[d][0] - coordOnPlane[d]) / viewVec[d];
                 double dn = (border[d][1] - coordOnPlane[d]) / viewVec[d];
+                if ((dp > 0 && dn > 0) || (dp < 0 && dn < 0)){
+                    // outside the box, no samples
+                    return new double[]{0, 0};
+                }
                 
-                if (dp < 0 || dn > 0){
+                if (dp < 0 && dn > 0){
                     double tmp = dp;
                     dp = dn;
                     dn = tmp;
@@ -189,9 +193,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             
         }
         double[] fbDepth = new double[] {fDepth, bDepth};
-        // System.out.println("getRayDepth::fbDepth " + fbDepth);
         return fbDepth;
-    }
+}
     
     void mip(double[] viewMatrix){
         clearImage(nativeImage);
@@ -230,7 +233,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 double gap = (fbDepth[0] - fbDepth[1]) / sampleNum;
                 // System.out.println("mip::gap: " + gap);
                 // ray cast through (i,j)     
-                for (double k = fbDepth[1]; k <= fbDepth[0]; k += gap) {
+                for (double k = fbDepth[1]; k < fbDepth[0]; k += gap) {
                     voxelCoord[0] = coordOnPlane[0] + viewVec[0] * k;
                     voxelCoord[1] = coordOnPlane[1] + viewVec[1] * k;
                     voxelCoord[2] = coordOnPlane[2] + viewVec[2] * k;
@@ -308,7 +311,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 TFColor voxelColor = tFunc.getColor(0);
                 // System.out.println("mip::gap: " + gap);
                 // ray cast through (i,j)
-                for (double k = fbDepth[1]; k <= fbDepth[0]; k += gap) {
+                for (double k = fbDepth[1]; k < fbDepth[0]; k += gap) {
                     voxelCoord[0] = coordOnPlane[0] + viewVec[0] * k;
                     voxelCoord[1] = coordOnPlane[1] + viewVec[1] * k;
                     voxelCoord[2] = coordOnPlane[2] + viewVec[2] * k;
@@ -341,6 +344,22 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         this.rayFunction = functionName;
     }
     
+    public double levoy(double[] p, int v) {
+    	double f = v;
+    	double fv = tfEditor2D.triangleWidget.baseIntensity;
+    	double g = Math.abs(gradients.getInterpolatedGrad(p[0], p[1], p[2]).mag);
+    	
+    	double r = tfEditor2D.triangleWidget.radius;
+    	double alpha;
+    	if(g == 0 && f == fv)
+    		alpha = 1;
+    	else if(g > 0 && f-r*g <= fv && fv <= f+r*g)
+    		alpha = 1 - ((1/r)*Math.abs((fv-f)/(g)));
+    	else
+    		alpha = 0;
+    	return (tfEditor2D.triangleWidget.color.a)*alpha;
+    }
+
     void transferFunc2D(double[] viewMatrix){
         clearImage(nativeImage);
 
@@ -378,20 +397,18 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 
                 double[] fbDepth = getRayDepth(viewVec, coordOnPlane);
                 double gap = (fbDepth[0] - fbDepth[1]) / sampleNum;
-                TFColor col = new TFColor(0, 0, 0, 0);
-                // System.out.println("mip::gap: " + gap);
+                TFColor col = tFunc.getColor(0);
+                double alpha = 1;
                 // ray cast through (i,j)
-                for (double k = fbDepth[1]; k <= fbDepth[0]; k += gap) {
+                for (double k = fbDepth[1]; k < fbDepth[0]; k += gap) {
                     voxelCoord[0] = coordOnPlane[0] + viewVec[0] * k;
                     voxelCoord[1] = coordOnPlane[1] + viewVec[1] * k;
                     voxelCoord[2] = coordOnPlane[2] + viewVec[2] * k;
                     val = getVoxel(voxelCoord);
-                    grad = gradients.getGradient(
-                            (int) Math.floor(voxelCoord[0]),
-                            (int) Math.floor(voxelCoord[1]),
-                            (int) Math.floor(voxelCoord[2])).mag;
+                    //grad = gradients.getInterpolatedGrad(voxelCoord[0],voxelCoord[1],voxelCoord[2]).mag;
+                    double alpha1 = levoy(voxelCoord, val);
                     
-                    col = compositingColor(col, tfEditor2D.getColor(val, grad));
+                    // col = compositingColor(col, tfEditor2D.getColor(val, grad));
                     
                 }
                 
