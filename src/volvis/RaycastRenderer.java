@@ -18,6 +18,7 @@ import util.TFChangeListener;
 import util.VectorMath;
 import volume.GradientVolume;
 import volume.Volume;
+import volume.VoxelGradient;
 
 /**
  *
@@ -344,7 +345,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         this.rayFunction = functionName;
     }
     
-    public double levoy(double[] p, int v) {
+    private double levoy(double[] p, int v) {
     	double f = v;
     	double fv = tfEditor2D.triangleWidget.baseIntensity;
     	double g = Math.abs(gradients.getInterpolatedGrad(p[0], p[1], p[2]).mag);
@@ -359,7 +360,41 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     		alpha = 0;
     	return (tfEditor2D.triangleWidget.color.a)*alpha;
     }
-
+    
+    private TFColor deepCopyTFColor(TFColor source){
+        return new TFColor(source.r, source.g, source.b, source.a);
+    }
+    private TFColor phongShading(double[] L, double[] p){
+        // head light assumption H = L = V
+        double[] N = new double[3];
+        // reverse view vector
+        VectorMath.setVector(L, -L[0], -L[1], -L[2]);
+        VoxelGradient grad = gradients.getInterpolatedGrad(p[0], p[1], p[2]);
+        TFColor c = deepCopyTFColor(tfEditor2D.triangleWidget.color);
+        if (grad.mag == 0){
+            N[0] = 0;
+            N[1] = 0;
+            N[2] = 0;
+        } else {
+            N[0] = grad.x/grad.mag;
+            N[1] = grad.y/grad.mag;
+            N[2] = grad.z/grad.mag;
+        }
+        double LN = VectorMath.dotproduct(L, N);
+        double NH = VectorMath.dotproduct(N, L);
+        
+        if ( LN > 0 && NH > 0){
+            double ambient = kambient;
+            double specular = kspec * Math.pow(NH, phongAlpha);
+            
+            c.r = c.r*kdiff*LN + ambient + specular;
+            c.g = c.g*kdiff*LN + ambient + specular;
+            c.b = c.b*kdiff*LN + ambient + specular;
+            // c.a remains
+        }
+        return c;
+    }
+    
     void transferFunc2D(double[] viewMatrix){
         clearImage(nativeImage);
 
@@ -382,9 +417,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         double[] volumeCenter = new double[3];
         VectorMath.setVector(volumeCenter, volume.getDimX() / 2, volume.getDimY() / 2, volume.getDimZ() / 2);
         
-        // sample on a plane through the origin of the volume data
-        double max = volume.getMaximum();
-
+        // sample on a plane through the centre of the volume data
+        // double max = volume.getMaximum();
         
         for (int j = 0; j < nativeImage.getHeight(); j++) {
             for (int i = 0; i < nativeImage.getWidth(); i++) {
@@ -396,7 +430,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 
                 double[] fbDepth = getRayDepth(viewVec, coordOnPlane);
                 double gap = (fbDepth[0] - fbDepth[1]) / sampleNum;
-                TFColor col = tfEditor2D.triangleWidget.color;
+                TFColor col = deepCopyTFColor(tfEditor2D.triangleWidget.color);
                 double alpha = 1;
                 // ray cast through (i,j)
                 for (double k = fbDepth[1]; k < fbDepth[0]; k += gap) {
@@ -409,7 +443,10 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                     alpha = alpha*(1-alpha1);
                 }
                 alpha = 1 - alpha;
-                
+                if (enableShading){
+                    col = phongShading(viewVec, coordOnPlane);
+                    //col = anotherShading(viewVec, voxelCoord, deepCopyTFColor(col));
+                }
                 // Map the intensity to a grey value by linear scaling
                 // voxelColor.r = val/max;
                 // voxelColor.g = voxelColor.r;
@@ -419,7 +456,11 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 // voxelColor = tFunc.getColor(val);
                 
                 // BufferedImage expects a pixel color packed as ARGB in an int
-                int c_alpha = col.a <= 1.0 ? (int) Math.floor(alpha* 255) : 255;
+                int c_alpha = alpha <= 1.0 ? (int) Math.floor(alpha* 255) : 255;
+                if (col.a < 0){
+                    System.out.println("alpha wrontg");
+                    c_alpha = 0;
+                }
                 int c_red = col.r <= 1.0 ? (int) Math.floor( col.r * 255) : 255;
                 int c_green = col.g <= 1.0 ? (int) Math.floor( col.g * 255) : 255;
                 int c_blue = col.b <= 1.0 ? (int) Math.floor( col.b * 255) : 255;
@@ -583,6 +624,10 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     private int sampleNum = 80;
     private double sampleDepth = 0; // Used for the slicer method
     private boolean enableShading = false;
+    private double kambient = 0.1;
+    private double kdiff = 0.7;
+    private double kspec = 0.2;
+    private int phongAlpha = 10;
 
     public void setSampleNum(int sn) {
         sampleNum = sn;
