@@ -14,6 +14,7 @@ import gui.TransferFunctionEditor;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import util.TFChangeListener;
 import util.VectorMath;
 import volume.GradientVolume;
@@ -379,18 +380,16 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             N[1] = grad.y/grad.mag;
             N[2] = grad.z/grad.mag;
         }
-        double LN = VectorMath.dotproduct(L, N);
-        double NH = VectorMath.dotproduct(N, L);
+        double LN = Math.abs(VectorMath.dotproduct(L, N));
+        double NH = Math.abs(VectorMath.dotproduct(N, L));
         
-        if ( LN > 0 && NH > 0){
-            double ambient = kambient;
-            double specular = kspec * Math.pow(NH, phongAlpha);
-            
-            c.r = c.r*kdiff*LN + ambient + specular;
-            c.g = c.g*kdiff*LN + ambient + specular;
-            c.b = c.b*kdiff*LN + ambient + specular;
-            // c.a remains
-        }
+        double ambient = kambient;
+        double specular = kspec * Math.pow(NH, phongAlpha);
+
+        c.r = c.r*kdiff*LN + ambient + specular;
+        c.g = c.g*kdiff*LN + ambient + specular;
+        c.b = c.b*kdiff*LN + ambient + specular;
+        // c.a remains
         return c;
     }
     
@@ -457,7 +456,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 // BufferedImage expects a pixel color packed as ARGB in an int
                 int c_alpha = alpha <= 1.0 ? (int) Math.floor(alpha* 255) : 255;
                 if (col.a < 0){
-                    System.out.println("alpha wrontg");
+                    System.out.println("alpha wrong");
                     c_alpha = 0;
                 }
                 int c_red = col.r <= 1.0 ? (int) Math.floor( col.r * 255) : 255;
