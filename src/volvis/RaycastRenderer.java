@@ -312,7 +312,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 TFColor voxelColor = tFunc.getColor(0);
                 // System.out.println("mip::gap: " + gap);
                 // ray cast through (i,j)
-                for (double k = fbDepth[1]; k <= fbDepth[0]; k += gap) {
+                for (double k = fbDepth[1]; k < fbDepth[0]; k += gap) {
                     voxelCoord[0] = coordOnPlane[0] + viewVec[0] * k;
                     voxelCoord[1] = coordOnPlane[1] + viewVec[1] * k;
                     voxelCoord[2] = coordOnPlane[2] + viewVec[2] * k;
@@ -340,16 +340,16 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         
         scaleImageTo(nativeImage, image);
     }
-
-    public void setRayFunction(int functionName){
-        this.rayFunction = functionName;
-    }
     
     void transferFunc2D(double[] viewMatrix){
         
     }
     
-    public void callRayFunction() {
+    public void setRayFunction(int functionName){
+        this.rayFunction = functionName;
+    }
+    
+    private void callRayFunction() {
         switch(this.rayFunction) {
             case 0:
                 slicer(viewMatrix);
@@ -362,8 +362,10 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 break;
             case 3:
                 transferFunc2D(viewMatrix);
+                break;
             default:
                 slicer(viewMatrix);
+                break;
         }
     }
     
@@ -430,13 +432,20 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         renderScale = rs;
         createNativeImage();
     }
+    
     private void createNativeImage() {
         nativeImage = new BufferedImage(
             (int) Math.floor(image.getWidth() * renderScale),
             (int) Math.floor(image.getHeight() * renderScale),
             BufferedImage.TYPE_INT_ARGB);
     }
-
+    
+    public void setShading(boolean shading){
+        this.enableShading = shading;
+        callRayFunction();
+        createNativeImage();
+    }
+    
     @Override
     public void visualize(GL2 gl) {
 
@@ -497,7 +506,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     private double renderScale = 0.5;
     private int sampleNum = 80;
     private double sampleDepth = 0; // Used for the slicer method
-
+    // shading
+    private boolean enableShading = false;
+    
     public void setSampleNum(int sn) {
         sampleNum = sn;
         callRayFunction();
