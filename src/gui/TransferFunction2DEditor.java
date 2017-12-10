@@ -89,6 +89,17 @@ public class TransferFunction2DEditor extends javax.swing.JPanel {
         opacityLabel.setText(String.format("%.1f", triangleWidget.color.a));
         colorButton.setBackground(new Color((float) triangleWidget.color.r, (float) triangleWidget.color.g, (float) triangleWidget.color.b));
     }
+    
+    public double getAlpha(double val, double gradmag) {
+        return triangleWidget.getAlpha(val, gradmag);
+    }
+    
+    public TFColor getColor(double val, double gradmag) {
+        return new TFColor(triangleWidget.color.r,
+                triangleWidget.color.g,
+                triangleWidget.color.b,
+                triangleWidget.getAlpha(val, gradmag));
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -297,8 +308,22 @@ public class TransferFunction2DEditor extends javax.swing.JPanel {
             this.radius = r;
             this.color = new TFColor(0.0, 204.0/255.0, 153.0/255.0, 0.3);
         }
+        
+        public double getAlpha(double val, double grad) {
+            double r = radius;
+            
+            if (grad == 0) {
+                return 1;
+            }
+            if (grad > 0 &&
+                    val - r * grad < baseIntensity &&
+                    val + r * grad > baseIntensity) {
+                return 1 - (1/r) * Math.abs((baseIntensity - val)/grad);
+            }
+            return 0;
+        }
     }
-
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton colorButton;
     private javax.swing.JTextField intensityLabel;
