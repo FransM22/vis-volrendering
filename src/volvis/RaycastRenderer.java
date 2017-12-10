@@ -389,7 +389,6 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         for (int j = 0; j < nativeImage.getHeight(); j++) {
             for (int i = 0; i < nativeImage.getWidth(); i++) {
                 int val = 0;
-                double grad = 0;
                 
                 coordOnPlane[0] = uVec[0] * (i - imageCenter) * (1/renderScale) + vVec[0] * (j - imageCenter) * (1/renderScale) + volumeCenter[0];
                 coordOnPlane[1] = uVec[1] * (i - imageCenter) * (1/renderScale) + vVec[1] * (j - imageCenter) * (1/renderScale) + volumeCenter[1];
@@ -397,7 +396,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 
                 double[] fbDepth = getRayDepth(viewVec, coordOnPlane);
                 double gap = (fbDepth[0] - fbDepth[1]) / sampleNum;
-                TFColor col = tFunc.getColor(0);
+                TFColor col = tfEditor2D.triangleWidget.color;
                 double alpha = 1;
                 // ray cast through (i,j)
                 for (double k = fbDepth[1]; k < fbDepth[0]; k += gap) {
@@ -407,10 +406,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                     val = getVoxel(voxelCoord);
                     //grad = gradients.getInterpolatedGrad(voxelCoord[0],voxelCoord[1],voxelCoord[2]).mag;
                     double alpha1 = levoy(voxelCoord, val);
-                    
-                    // col = compositingColor(col, tfEditor2D.getColor(val, grad));
-                    
+                    alpha = alpha*(1-alpha1);
                 }
+                alpha = 1 - alpha;
                 
                 // Map the intensity to a grey value by linear scaling
                 // voxelColor.r = val/max;
@@ -421,7 +419,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 // voxelColor = tFunc.getColor(val);
                 
                 // BufferedImage expects a pixel color packed as ARGB in an int
-                int c_alpha = col.a <= 1.0 ? (int) Math.floor(col.a * 255) : 255;
+                int c_alpha = col.a <= 1.0 ? (int) Math.floor(alpha* 255) : 255;
                 int c_red = col.r <= 1.0 ? (int) Math.floor( col.r * 255) : 255;
                 int c_green = col.g <= 1.0 ? (int) Math.floor( col.g * 255) : 255;
                 int c_blue = col.b <= 1.0 ? (int) Math.floor( col.b * 255) : 255;
